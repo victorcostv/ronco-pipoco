@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ronco &amp; Pipoco</title>
+<meta name="description" content="Simulador de ronco e pipoco de motor com o painel de cada carro: Camaro V8, Maverick V8, Golf GTI, Huracán V10 e Fórmula 1. Liga no OBD2 do seu carro.">
+<meta name="theme-color" content="#0b0c0f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ronco">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600&family=Saira+Condensed:wght@500;600;700&family=Exo+2:wght@600;700&family=Jost:wght@400;500&family=Barlow:wght@500;600;700&family=Michroma&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-car="camaro">
+<main class="app">
+  <header class="top">
+    <div class="brand">
+      <h1>Ronco <span>&amp;</span> Pipoco</h1>
+      <p class="carline" id="carLine">Chevrolet Camaro SS · V8 6.2 aspirado</p>
+    </div>
+    <div class="topbtns">
+      <button type="button" id="fsBtn" class="iconbtn" aria-pressed="false" aria-label="Modo painel: tela cheia só com os relógios" title="Modo painel: tela cheia só com os relógios">
+        <svg class="ico-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+        <svg class="ico-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"/></svg>
+      </button>
+      <button type="button" id="power" class="start" aria-pressed="false" aria-label="Ligar motor">
+        <span class="ring" aria-hidden="true"></span>
+        <span class="lbl" aria-hidden="true"><small>ENGINE</small><b id="powerTxt">START</b><small>STOP</small></span>
+      </button>
+    </div>
+  </header>
+
+  <section class="cluster-wrap" id="clusterWrap" aria-label="Painel">
+    <div id="cluster" class="cl"></div>
+    <div class="backfire" id="backfire" aria-hidden="true"></div>
+  </section>
+
+  <section class="garage" aria-label="Garagem">
+    <div class="cars" role="radiogroup" aria-label="Carro" id="segEngine"></div>
+  </section>
+
+  <section class="pedals" id="pedals" aria-label="Pedais">
+    <div class="side">
+      <div class="hint" id="hint">
+        <div id="hintSim">
+          <p>Quanto mais fundo, mais ronco. Solte de uma vez acima de 3 mil giros pra ouvir o pipoco.</p>
+          <p>Pé embaixo segura no limitador e o painel pisca SHIFT.</p>
+          <p>O botão de tela cheia deixa só os relógios.</p>
+          <p class="kbd">No teclado: ↑ ou espaço acelera, ↓ freia.</p>
+        </div>
+        <div id="hintObd" hidden>
+          <p>O pedal da tela segue o seu pé. A marcha e a velocidade vêm do seu carro.</p>
+          <p>O giro do seu carro é convertido pra faixa do carro escolhido.</p>
+          <p>Parado: o pipoco vem quando você solta depois de acelerar. Andando: ele continua enquanto o carro desacelera.</p>
+          <p>Com o carro parado, pise até o fundo uma vez pra calibrar o pedal.</p>
+        </div>
+      </div>
+      <div class="pad brake" id="brake" role="slider" tabindex="0" aria-label="Freio" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-on="0" hidden>
+        <div class="fill"></div><div class="plate"></div>
+        <div class="cap"><span>Freio</span><span class="pct">0%</span></div>
+      </div>
+    </div>
+    <div class="pad gas" id="gas" role="slider" tabindex="0" aria-label="Acelerador" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-on="0">
+      <div class="fill"></div><div class="plate"></div>
+      <div class="cap"><span>Acelerador</span><span class="pct">0%</span></div>
+    </div>
+  </section>
+
+  <section class="controls" aria-label="Ajustes">
+    <div class="seg" role="radiogroup" aria-label="Situação do carro" id="segMode">
+      <button type="button" role="radio" aria-checked="true" data-v="0">Parado</button>
+      <button type="button" role="radio" aria-checked="false" data-v="1">Andando</button>
+    </div>
+    <div class="sliders">
+      <label class="sl"><span>Pipoco <output id="popOut">70%</output></span><input id="pop" type="range" min="0" max="100" value="70"></label>
+      <label class="sl"><span>Escape <output id="exhOut">50%</output></span><input id="exh" type="range" min="0" max="100" value="50"></label>
+      <label class="sl"><span>Volume <output id="volOut">80%</output></span><input id="vol" type="range" min="0" max="100" value="80"></label>
+    </div>
+    <div class="obd" id="obd">
+      <div class="obd-row">
+        <button type="button" id="obdBtn" class="obd-btn" aria-pressed="false">Conectar OBD2</button>
+        <button type="button" id="obdBle" class="obd-alt">Adaptador BLE</button>
+      </div>
+      <p class="obd-msg" id="obdMsg" role="status" aria-live="polite"></p>
+      <details class="obd-log"><summary>Detalhes da conexão</summary><pre id="obdLog"></pre></details>
+    </div>
+  </section>
+
+  <p class="status" id="status" role="status" aria-live="polite"></p>
+</main>
+<div class="shiftglow" id="shiftGlow" aria-hidden="true"></div>
+
+<script src="js/engine.js"></script>
+<script src="js/obd.js"></script>
+<script src="js/cluster.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
