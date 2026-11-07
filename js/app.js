@@ -252,7 +252,7 @@
     const g = gearInfo();
     cluster.update({
       rpm: dispRpm, kmh: dispKmh, lim, state: S.state, cut: !!S.cut && S.state === 2,
-      obd: !!obd.link, flash, boost: S.boost || 0, mode, pops: S.pops || 0, now, odoKm, shift, blink, vtec: !!S.vtec,
+      obd: !!obd.link, flash, boost: S.boost || 0, mode, thr: S.state === 2 ? S.thr || 0 : 0, now, odoKm, shift, blink, vtec: !!S.vtec,
       gearTxt: g.gearTxt, gearChar: g.gearChar, quad: g.quad, gearNum: g.gearNum, sub: g.sub, msg: g.msg
     });
     requestAnimationFrame(frame);

@@ -34,6 +34,7 @@ const Cluster = (() => {
   const setCls = (n, c, on) => { if (n) n.classList.toggle(c, !!on); };
   const isMult = (v, m) => m > 0 && Math.abs(v / m - Math.round(v / m)) < 1e-6;
   const shiftOn = (s) => s.shift === 1 || (s.shift === 2 && s.blink);
+  const pedalPct = (s) => Math.round(Math.min(1, Math.max(0, s.thr || 0)) * 100) + '%';
 
   /* ---------- ponteiros (desenhados apontando para a direita, ângulo 0) ---------- */
   const needles = {
@@ -333,8 +334,8 @@ const Cluster = (() => {
       const spd = txt(svg, cx, cy + 60, 'hspd', '0');
       txt(svg, cx, cy + 84, 'hunit', 'km/h');
       const msg = txt(svg, cx, cy + 108, 'hmsg', '');
-      txt(svg, 50, 150, 'hlbl', 'PIPOCOS');
-      const pops = txt(svg, 50, 178, 'hval', '0');
+      txt(svg, 50, 150, 'hlbl', 'PEDAL');
+      const pedal = txt(svg, 50, 178, 'hval', '0%');
       txt(svg, W - 50, 150, 'hlbl', 'RPM');
       const rpmT = txt(svg, W - 50, 178, 'hval', '0');
       const mode = txt(svg, cx, H - 14, 'hmode', 'STRADA');
@@ -354,7 +355,7 @@ const Cluster = (() => {
           setText(gear, running ? s.gearTxt : '');
           setText(spd, String(Math.round(s.kmh)));
           setText(msg, running ? (s.sub || '') : s.msg);
-          setText(pops, String(s.pops || 0));
+          setText(pedal, pedalPct(s));
           setText(rpmT, String(Math.round(s.rpm / 10) * 10));
           setText(mode, s.obd ? 'CORSA' : s.mode === 1 ? 'SPORT' : 'STRADA');
           setCls(lCut, 'on', s.cut); setCls(lObd, 'on', s.obd);
@@ -391,7 +392,7 @@ const Cluster = (() => {
       const rpm = segNum(svg, 426 - (5 * (32 * 0.52 + 32 * 0.2) - 32 * 0.2) / 2, 96, 32, 5);
       const NB = 24, bx = 52, bw = (W - 104 - (NB - 1) * 3) / NB, bars = [];
       for (let i = 0; i < NB; i++) bars.push(el('rect', { x: fx(bx + i * (bw + 3)), y: 226, width: fx(bw), height: 12, class: 'bar' }, svg));
-      const pops = txt(svg, 52, 258, 'lcdtxt', 'POP 0');
+      const pedal = txt(svg, 52, 258, 'lcdtxt', 'PEDAL 0%');
       const msg = txt(svg, 260, 258, 'lcdtxt c', '');
       const lap = txt(svg, W - 52, 258, 'lcdtxt r', '');
       let lastBars = -1;
@@ -404,7 +405,7 @@ const Cluster = (() => {
           rpm.set(Math.round(s.rpm / 10) * 10);
           const lit = running ? Math.round(Math.min(1, s.rpm / c.lim) * NB) : 0;
           if (lit !== lastBars) { lastBars = lit; bars.forEach((b, i) => b.classList.toggle('on', i < lit)); }
-          setText(pops, 'POP ' + (s.pops || 0));
+          setText(pedal, 'PEDAL ' + pedalPct(s));
           setText(lblGear, s.shift ? 'SHIFT' : 'MARCHA');
           setCls(lblGear, 'shift', s.shift > 0); setCls(lblGear, 'on', shiftOn(s));
           setText(msg, running ? (s.sub || '') : s.msg);
@@ -428,14 +429,14 @@ const Cluster = (() => {
         <linearGradient id="gt3-scr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#13161b"/><stop offset="1" stop-color="#08090b"/></linearGradient>
       </defs>`;
       el('rect', { x: 0, y: 0, width: W, height: H, rx: 22, class: 'bg' }, svg);
-      // telas dos lados: velocidade e pipocos à esquerda, giro e modo à direita
+      // telas dos lados: velocidade e pedal à esquerda, giro e modo à direita
       const SX = [12, W - 144], SW = 132;
       for (const x of SX) el('rect', { x, y: 52, width: SW, height: 196, rx: 16, class: 'scr' }, svg);
       const L = SX[0] + SW / 2, Rx = SX[1] + SW / 2;
       txt(svg, L, 80, 'slbl', 'KM/H');
       const spd = txt(svg, L, 120, 'sval', '0');
-      txt(svg, L, 166, 'slbl', 'PIPOCOS');
-      const pops = txt(svg, L, 190, 'sval sm', '0');
+      txt(svg, L, 166, 'slbl', 'PEDAL');
+      const pedal = txt(svg, L, 190, 'sval sm', '0%');
       const lPop = txt(svg, L - 30, 228, 'slamp pop', 'POP');
       const lCut = txt(svg, L + 22, 228, 'slamp cut', 'LIMITE');
       txt(svg, Rx, 80, 'slbl', 'RPM');
@@ -481,7 +482,7 @@ const Cluster = (() => {
           setText(gear, running ? (s.gearChar === '-' ? '–' : s.gearChar) : '');
           setText(msg, running ? (s.sub || '') : s.msg);
           setText(spd, String(Math.round(s.kmh)));
-          setText(pops, String(s.pops || 0));
+          setText(pedal, pedalPct(s));
           setText(rpmT, fmtRpm(s.rpm));
           setText(mode, s.obd ? 'TRACK' : s.mode === 1 ? 'SPORT' : 'NORMAL');
           setCls(lCut, 'on', s.cut); setCls(lObd, 'on', s.obd); setCls(lPop, 'on', s.flash > 0.25);

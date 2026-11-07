@@ -62,8 +62,10 @@ class EngineDSP {
       {
         // Honda Civic Type R (EK9), B16B 1.6 VTEC: 4 em linha que gira alto. Acima de 5.800 rpm com
         // o pé embaixo o comando troca pro perfil bravo: admissão gritando, som mais rasgado e mais força.
+        // Corte de giro marcado: cai uns 400 giros a cada corte (o "pá-pá-pá" no limitador) e, andando
+        // com o pé no fundo, encosta no corte antes de trocar de marcha.
         id: 'civic', cyl: 4, banks: [0, 1, 0, 1],
-        idle: 850, lim: 8700, hyst: 170, revUp: 11500, revDown: 6400,
+        idle: 850, lim: 8700, hyst: 420, revUp: 11500, revDown: 6400, cut: { shift: 0.5 },
         delays: [3.5, 3.8], fb: -0.5, damp: 0.5, bankGain: [1, 0.92],
         res: [[140, 1.1, 0.35], [520, 1.5, 0.55], [1900, 1.6, 0.55]], dry: 0.55,
         tau: 1.15, rise: 0.17, rasp: 0.4, lp: [2600, 7600], drive: [1.3, 2.6], lope: 0.05, cylVar: 0.05, idleWob: 14,
@@ -138,7 +140,7 @@ class EngineDSP {
     this.state = 0; this.stateT = 0; this.time = 0;
     this.rpm = 0; this.thr = 0; this.load = 0; this.combust = 0; this.starter = 0;
     this.fuelCut = false; this.hyst = 200; this.flare = 0; this.wob = 0; this.idleT = 800;
-    this.boost = 0; this.v = 0; this.gear = 1; this.thrMem = 0; this.shiftCut = 0; this.shiftCool = 0; this.blipT = 0;
+    this.boost = 0; this.v = 0; this.gear = 1; this.thrMem = 0; this.shiftCut = 0; this.shiftCool = 0; this.blipT = 0; this.limT = 0;
     this.popWin = 0; this.popRate = 0; this.armLift = 0; this.popCount = 0; this.bigCount = 0;
     this.bovEnv = 0; this.bovAmp = 0; this.bovA = 0; this.ia = 0;
     this.ext = false; this.extRpm = 0; this.extT = 0; this.extSlope = 0; this.extPred = 0;
@@ -354,11 +356,12 @@ class EngineDSP {
       const wheel = this.v / (2 * Math.PI * rw) * 60 * Rg;
       if (this.shiftCut > 0) this.shiftCut -= dt;
       cutNow = this.shiftCut > 0;
-      if (this.rpm >= lim) { this.fuelCut = true; this.hyst = 60; }
+      if (this.rpm >= lim) { this.fuelCut = true; this.hyst = P.cut ? P.hyst * 0.4 : 60; }
       else if (this.fuelCut && this.rpm < lim - this.hyst) this.fuelCut = false;
       let Te = P.tmax * tq * Math.pow(thr, 0.9) * bF;
       if (this.fuelCut || cutNow) Te = 0;
-      const Tb = (18 + 0.011 * this.rpm) * (1 - thr);
+      // corte de giro marcado: sem combustão o motor segura o carro mesmo com o pé no fundo
+      const Tb = (18 + 0.011 * this.rpm) * (P.cut && this.fuelCut ? 1 : 1 - thr);
       const launch = this.gear === 1 ? idleT + thr * 0.36 * RR : idleT;
       const tgt = Math.max(wheel, launch);
       const slip = tgt > wheel + 30;
@@ -379,12 +382,16 @@ class EngineDSP {
       this.v = Math.max(0, v + (F - Fr) / m * dt);
 
       this.thrMem = Math.max(thr, this.thrMem * Math.exp(-dt / 2.5));
+      // pé no fundo num carro de corte marcado: encosta no corte, bate algumas vezes e só então troca
+      const hold = !!P.cut && thr > 0.9;
+      if (hold && this.rpm >= lim - 0.5 * P.hyst) this.limT += dt;
+      else if (!hold || this.rpm < lim - 2 * P.hyst) this.limT = 0;
       if (!cutNow && this.shiftCool <= 0) {
         const upLo = P.idle + 0.3 * RR, dnLo = P.idle + 0.084 * RR;
         const upAt = thr < 0.1 ? lim - 0.06 * RR : upLo + (lim - 0.031 * RR - upLo) * Math.pow(Math.max(thr, this.thrMem * 0.9), 1.3);
         const dnAt = this.brakeIn > 0.15 ? P.idle + 0.265 * RR : dnLo + (Math.min(P.idle + 0.486 * RR, upAt * 0.55) - dnLo) * thr;
-        if (this.gear < G.length && this.rpm > upAt && !slip) {
-          this.gear++; this.shiftCool = 0.55;
+        if (this.gear < G.length && (hold ? this.limT >= P.cut.shift : this.rpm > upAt) && !slip) {
+          this.gear++; this.shiftCool = 0.55; this.limT = 0;
           if (thr > 0.35) {
             this.shiftCut = 0.09 + 0.05 * thr;
             if (thr > 0.6 && this.popAmt > 0.05 && this.rnd() < 0.35 + 0.6 * this.popAmt) {
@@ -425,7 +432,7 @@ class EngineDSP {
     const over = this.offPed ? EngineDSP.ss(P.idle + 0.11 * RR, P.idle + 0.315 * RR, this.rpm) : 0;
     let rate = this.popAmt * over * (1.2 + 20 * this.popWin);
     if (this.mode === 1) rate += this.popAmt * over * 2.5 * EngineDSP.ss(P.idle + 0.264 * RR, P.idle + 0.589 * RR, this.rpm);
-    if (this.fuelCut && this.mode === 0) rate += this.popAmt * 8;
+    if (this.fuelCut && (this.mode === 0 || P.cut)) rate += this.popAmt * 8;
     if (cutNow) rate += this.popAmt * 12;
     this.popRate = rate;
   }
