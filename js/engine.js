@@ -58,6 +58,38 @@ class EngineDSP {
         intake: 0.16, turbo: false, spool: 0, pre: 1, gain: 0.85, crank: 0.5,
         pop: { bigF: [900, 900], crkF: [1500, 1500], thA: [0.25, 0.2], thF: [200, 60], rev: 0.22 },
         mass: 605, tmax: 340, cda: 1.1, gears: [23.0, 17.2, 13.6, 11.0, 9.2, 7.8, 6.6]
+      },
+      {
+        // Honda Civic Type R (EK9), B16B 1.6 VTEC: 4 em linha que gira alto. Acima de 5.800 rpm com
+        // o pé embaixo o comando troca pro perfil bravo: admissão gritando, som mais rasgado e mais força.
+        id: 'civic', cyl: 4, banks: [0, 1, 0, 1],
+        idle: 850, lim: 8700, hyst: 170, revUp: 11500, revDown: 6400,
+        delays: [3.5, 3.8], fb: -0.5, damp: 0.5, bankGain: [1, 0.92],
+        res: [[140, 1.1, 0.35], [520, 1.5, 0.55], [1900, 1.6, 0.55]], dry: 0.55,
+        tau: 1.15, rise: 0.17, rasp: 0.4, lp: [2600, 7600], drive: [1.3, 2.6], lope: 0.05, cylVar: 0.05, idleWob: 14,
+        intake: 0.07, turbo: false, spool: 0, pre: 1, gain: 1.05, crank: 0.7,
+        howl: [6, 2.5, 2.1],
+        vtec: { at: 5800, hyst: 300, thrOn: 0.3, thrOff: 0.12, intake: 0.34, howl0: 0.18, rasp: 1.9, lp: 1.48, drive: 1.38, tau: 0.75, tq: 1.16, dip: 0.1, gain: 1.22 },
+        pop: {
+          bigAmp: [1.2, 0.6], bigTau: [0.01, 0.012], crkTau: [0.0018, 0.003], bigF: [800, 600], crkF: [1300, 1400],
+          thA: [0.28, 0.18], thF: [170, 60], rev: 0.22
+        },
+        mass: 1050, tmax: 160, cda: 0.62, gears: [15.5, 10.1, 7.0, 5.3, 4.06]
+      },
+      {
+        // Porsche 911 GT3 (992), boxer 6 4.0 aspirado: as duas bancadas se alternam (a assimetria dá o
+        // rosnado do boxer) e em cima vira um grito limpo até 9.000 rpm, com muita admissão.
+        id: 'gt3', cyl: 6, banks: [0, 1, 0, 1, 0, 1],
+        idle: 880, lim: 9000, hyst: 160, revUp: 16000, revDown: 8000,
+        delays: [3.3, 4.1], fb: -0.4, damp: 0.5, bankGain: [1, 0.82],
+        res: [[115, 1.2, 0.4], [650, 1.4, 0.55], [2500, 1.7, 0.6]], dry: 0.58,
+        tau: 1.0, rise: 0.15, rasp: 0.4, lp: [3000, 9800], drive: [1.35, 2.6], lope: 0.05, cylVar: 0.06, idleWob: 18,
+        intake: 0.15, turbo: false, spool: 0, pre: 1, gain: 1.15, crank: 0.75,
+        howl: [3, 2.2, 0.9],
+        pop: {
+          bigF: [700, 500], crkF: [1200, 1300], thA: [0.35, 0.25], thF: [130, 50], crack: 0.15, tailW: 0.14, rev: 0.28
+        },
+        mass: 1435, tmax: 470, cda: 0.66, gears: [16.1, 10.2, 7.4, 5.8, 4.8, 4.1, 3.6]
       }
     ];
   }
@@ -125,6 +157,8 @@ class EngineDSP {
     this.lpf = new Float64Array(7); this.inBP = new Float64Array(7);
     this.hisBP = new Float64Array(7); this.bovBP = new Float64Array(7);
     this.bassLP = new Float64Array(7); this.bassBP = new Float64Array(7);
+    this.howlBP = new Float64Array(7); this.hw = 0; this.gN = 1;
+    this.vt = 0; this.vtS = 0; this.vtecN = 0;
     this.dcX = 0; this.dcY = 0; this.whPh = 0; this.stPh = 0;
     this.NV = 32; this.pv = [];
     for (let i = 0; i < this.NV; i++) {
@@ -181,6 +215,8 @@ class EngineDSP {
     this.setLP(this.bassLP, 150, 0.7);
     this.setBP(this.bassBP, 300, 0.55);
     this.PP = Object.assign(EngineDSP.popDef(), P.pop || {});
+    this.setBP(this.howlBP, 1000, P.howl ? P.howl[1] : 1);
+    this.hw = 0; this.gN = P.gain; this.vt = 0; this.vtS = 0;
     if (this.gear > P.gears.length) this.gear = P.gears.length;
     if (!P.turbo) { this.boost = 0; this.bovEnv = 0; }
   }
@@ -226,6 +262,14 @@ class EngineDSP {
     const tau = tp > this.thr ? 0.045 : 0.028;
     this.thr += (tp - this.thr) * (1 - Math.exp(-dt / tau));
     const thr = this.thr;
+    // VTEC: troca pro comando bravo acima do giro de entrada com o pé embaixo; volta com histerese ou pé solto
+    if (P.vtec) {
+      const V = P.vtec, run = this.state === 2;
+      const vOn = run && (this.vt ? this.rpm > V.at - V.hyst && thr > V.thrOff : this.rpm > V.at && thr > V.thrOn);
+      if (vOn && !this.vt) this.vtecN++;
+      this.vt = vOn ? 1 : 0;
+      this.vtS += (this.vt - this.vtS) * (1 - Math.exp(-dt / 0.02));
+    }
     this.starter = 0;
     this.repT += dt;
     if (this.repT >= 0.033) { this.repT = 0; this.report(); }
@@ -275,7 +319,12 @@ class EngineDSP {
       this.boost += (bt - this.boost) * (1 - Math.exp(-dt / Math.max(0.08, tb)));
     }
 
-    const tq = 0.78 + 0.22 * Math.sin(Math.PI * Math.min(1, this.rpm / lim));
+    let tq = 0.78 + 0.22 * Math.sin(Math.PI * Math.min(1, this.rpm / lim));
+    if (P.vtec) {
+      // no comando manso a força cai um pouco antes da troca; no bravo ela volta com sobra
+      const V = P.vtec;
+      tq *= (1 - V.dip * EngineDSP.ss(V.at - 1800, V.at, this.rpm) * (1 - this.vtS)) * (1 + (V.tq - 1) * this.vtS);
+    }
     const bF = P.turbo ? 0.5 + 0.5 * this.boost : 1;
     let cutNow = false;
 
@@ -382,9 +431,9 @@ class EngineDSP {
   }
 
   blockUpdate() {
-    const P = this.P, sr = this.sr, ex = this.exh;
+    const P = this.P, sr = this.sr, ex = this.exh, V = P.vtec, vs = V ? this.vtS : 0;
     const r = Math.max(350, this.rpm);
-    const td = P.tau * 0.001 * (0.55 + 0.45 * Math.min(2.2, 1000 / r));
+    const td = P.tau * 0.001 * (0.55 + 0.45 * Math.min(2.2, 1000 / r)) * (V ? 1 - (1 - V.tau) * vs : 1);
     const tr = Math.min(td * 0.4, P.rise * 0.001 * (0.7 + 0.3 * Math.min(2, 1000 / r)));
     this.aD = Math.exp(-1 / (td * sr)); this.aR = Math.exp(-1 / (tr * sr));
     const tp = Math.log(td / tr) * tr * td / (td - tr);
@@ -394,14 +443,20 @@ class EngineDSP {
     this.ampComp = Math.pow(r / 3000, -0.33);
     const ld = this.load;
     // escapamento: 0 = original (mais abafado), 0,5 = padrão, 1 = aberto (mais agudo e rasgado)
-    const fc = (P.lp[0] + (P.lp[1] - P.lp[0]) * Math.pow(ld, 1.1)) * (0.85 + 0.35 * Math.min(1.2, r / P.lim)) * (0.7 + 0.6 * ex);
+    const fc = (P.lp[0] + (P.lp[1] - P.lp[0]) * Math.pow(ld, 1.1)) * (0.85 + 0.35 * Math.min(1.2, r / P.lim)) * (0.7 + 0.6 * ex) * (V ? 1 + (V.lp - 1) * vs : 1);
     this.setLP(this.lpf, fc, 0.8);
     const ch = P.chuff || [0.0018, 0.0024];
     this.aN = Math.exp(-1 / ((ch[0] + ch[1] * (1 - ld)) * sr));
-    this.drv = (P.drive[0] + (P.drive[1] - P.drive[0]) * ld) * (0.8 + 0.4 * ex);
+    this.drv = (P.drive[0] + (P.drive[1] - P.drive[0]) * ld) * (0.8 + 0.4 * ex) * (V ? 1 + (V.drive - 1) * vs : 1);
     this.mk = 1 / Math.pow(this.drv, 0.55);
     this.setBP(this.inBP, 450 + r * 0.22, 0.9);
-    this.ia = P.intake * Math.pow(this.thr, 1.4) * (0.35 + 0.65 * Math.min(1, this.rpm / P.lim));
+    this.ia = (V ? P.intake + (V.intake - P.intake) * vs : P.intake) * Math.pow(this.thr, 1.4) * (0.35 + 0.65 * Math.min(1, this.rpm / P.lim));
+    // uivo: um formante que acompanha o giro (harmônico da explosão), forte nos aspirados de giro alto
+    if (P.howl) {
+      this.setBP(this.howlBP, Math.max(60, r / 120 * P.cyl * P.howl[0]), P.howl[1]);
+      this.hw = P.howl[2] * (0.3 + 0.7 * ld) * EngineDSP.ss(0.2 * P.lim, 0.75 * P.lim, this.rpm) * (0.8 + 0.4 * ex) * (V ? V.howl0 + (1 - V.howl0) * vs : 1);
+    }
+    this.gN = P.gain * (V ? 1 + (V.gain - 1) * vs : 1);
     if (P.turbo) {
       this.setBP(this.hisBP, 2800 + 4200 * this.boost, 1.4);
       if (this.bovEnv > 0.001) this.setBP(this.bovBP, 1300 + 1900 * this.bovEnv, 1.1);
@@ -413,7 +468,7 @@ class EngineDSP {
     this.onReport({
       rpm: this.rpm, thr: this.thr, load: this.load, gear: this.gear, kmh: this.v * 3.6,
       boost: this.boost, pops: this.popCount, big: this.bigCount, state: this.state,
-      cut: this.fuelCut, mode: this.mode, preset: this.pi, ext: this.ext
+      cut: this.fuelCut, mode: this.mode, preset: this.pi, ext: this.ext, vtec: this.vt, vtecN: this.vtecN
     });
   }
 
@@ -425,7 +480,8 @@ class EngineDSP {
     if (P.miss && ld < 0.25 && this.rnd() < P.miss) st *= 0.35;
     if (st < 0) st = 0;
     this.exc[b] += st;
-    const ne = (st * P.rasp * (0.45 + 0.55 * ld) * comb + st * 0.05) * (0.8 + 0.4 * this.exh);
+    const rasp = P.vtec ? P.rasp * (1 + (P.vtec.rasp - 1) * this.vtS) : P.rasp;
+    const ne = (st * rasp * (0.45 + 0.55 * ld) * comb + st * 0.05) * (0.8 + 0.4 * this.exh);
     if (ne > this.nEnv[b]) this.nEnv[b] = ne;
     if (this.popRate > 0) {
       const ev = Math.max(1, this.rpmS / 120 * P.cyl);
@@ -552,6 +608,7 @@ class EngineDSP {
 
       eng *= P.pre;
       let s = eng * P.dry + this.bq(this.res[0], eng) * P.res[0][2] + this.bq(this.res[1], eng) * P.res[1][2] + this.bq(this.res[2], eng) * P.res[2][2];
+      if (P.howl) s += this.bq(this.howlBP, eng) * this.hw;
       s = this.bq(this.lpf, s);
       s += pIn * PP.byp;
       if (P.bass) {
@@ -585,7 +642,7 @@ class EngineDSP {
         s += tri * 0.07 * this.starterS * (0.6 + 0.4 * Math.cos(6.283185307179586 * c * cyl));
       }
 
-      s *= P.gain;
+      s *= this.gN;
       let wl = 0, wr = 0;
       if (PP.rev > 0) {
         this.rvLp += (rIn - this.rvLp) * this.kRvLp;

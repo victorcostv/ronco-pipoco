@@ -1,11 +1,12 @@
 /* Ronco & Pipoco — cache pra funcionar sem internet (no carro) */
-const VERSION = 'ronco-v2';
+const VERSION = 'ronco-v3';
 const FONTS = 'ronco-fonts-v1';
 const SHELL = [
   './', './index.html', './css/app.css',
   './js/engine.js', './js/obd.js', './js/cluster.js', './js/app.js',
   './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',
-  './img/camaro.webp', './img/gti.webp', './img/huracan.webp', './img/maverick.webp', './img/f1.webp'
+  './img/camaro.webp', './img/gti.webp', './img/huracan.webp', './img/maverick.webp', './img/f1.webp',
+  './img/civic.webp', './img/gt3.webp'
 ];
 
 self.addEventListener('install', (e) => {

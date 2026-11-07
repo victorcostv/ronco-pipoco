@@ -13,6 +13,8 @@ body[data-car="maverick"] { --bg: #0c0a08; --bg-2: #171209; --surface: #1a1612; 
 body[data-car="gti"] { --accent: #e10a17; --glow: #ffffff; --fill: rgba(225, 10, 23, 0.16); }
 body[data-car="huracan"] { --bg: #050507; --bg-2: #0d0d13; --surface: #111116; --surface-2: #18181f; --line: #26262f; --accent: #ffb400; --accent-ink: #1a1200; --glow: #ff7a00; --fill: rgba(255, 180, 0, 0.14); }
 body[data-car="f1"] { --bg: #07080a; --bg-2: #0f1115; --surface: #14171b; --surface-2: #1b1f24; --line: #2a2f36; --accent: #39ff14; --accent-ink: #061a02; --glow: #4f7bff; --fill: rgba(57, 255, 20, 0.12); }
+body[data-car="civic"] { --accent: #e3001b; --glow: #ffb000; --fill: rgba(227, 0, 27, 0.16); }
+body[data-car="gt3"] { --bg: #07090c; --bg-2: #0c1219; --surface: #12161c; --surface-2: #19202a; --line: #232a35; --accent: #2b8fff; --accent-ink: #fff; --glow: #7cc0ff; --fill: rgba(43, 143, 255, 0.16); }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { height: 100%; background: var(--bg); }
@@ -84,13 +86,14 @@ h1 span { color: var(--accent); }
 .cl-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .cl text { text-anchor: middle; dominant-baseline: central; user-select: none; -webkit-user-select: none; }
 .cl .num { font-variant-numeric: tabular-nums; }
-.cl-huracan, .cl-f1 { display: block; padding: 0; background: none; border: 0; border-radius: 20px; overflow: hidden; }
-.cl-huracan svg, .cl-f1 svg { display: block; width: 100%; max-width: 100%; height: auto; }
+.cl-huracan, .cl-f1, .cl-gt3 { display: block; padding: 0; background: none; border: 0; border-radius: 20px; overflow: hidden; }
+.cl-huracan svg, .cl-f1 svg, .cl-gt3 svg { display: block; width: 100%; max-width: 100%; height: auto; }
 .cl-huracan svg { aspect-ratio: 520 / 420; }
 .cl-f1 svg { aspect-ratio: 520 / 300; }
+.cl-gt3 svg { aspect-ratio: 560 / 300; }
 
 /* telinha central dos painéis analógicos: em linhas no celular, em coluna quando cabe o painel de três partes */
-.cl .screen, .cl .mfd, .cl .plate { display: grid; gap: 6px; padding: 8px 12px; border-radius: 10px; }
+.cl .screen, .cl .mfd, .cl .plate, .cl .lcd { display: grid; gap: 6px; padding: 8px 12px; border-radius: 10px; }
 .cl .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
 .cl .r2 { justify-content: flex-start; gap: 16px; }
 .cl .brandline { font: 600 10px/1 "Exo 2", sans-serif; letter-spacing: 0.3em; color: #7f8fa3; white-space: nowrap; }
@@ -115,7 +118,7 @@ h1 span { color: var(--accent); }
 
 @container clusterbox (min-width: 560px) {
   .cl { grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.86fr) minmax(0, 1.12fr); grid-template-areas: "tach center speedo"; gap: 0 10px; padding: 14px 14px 12px; }
-  .cl .screen, .cl .mfd, .cl .plate { justify-items: center; text-align: center; gap: 8px; padding: 10px; }
+  .cl .screen, .cl .mfd, .cl .plate, .cl .lcd { justify-items: center; text-align: center; gap: 8px; padding: 10px; }
   .cl .row { flex-direction: column; justify-content: center; gap: 6px; }
   .cl .r3 .lamps { order: -1; justify-content: center; }
   .cl .gear { font-size: 40px; }
@@ -197,6 +200,68 @@ h1 span { color: var(--accent); }
 .cl-gti .boost .bfill { display: block; height: 100%; width: 0; background: #e10a17; }
 .cl-gti .boost .bval { font: 600 12px var(--font-num); font-style: normal; color: #fff; min-width: 48px; text-align: right; }
 
+/* Civic Type R: relógios brancos, ponteiros vermelhos, visor âmbar e luz do VTEC */
+.cl-civic { background: linear-gradient(180deg, #1b1c20, #0a0a0c); }
+.cl-civic .bezel { fill: url(#civ-bezel); }
+.cl-civic .face { fill: url(#civ-face); stroke: #9a9a93; stroke-width: 1; }
+.cl-civic .redband { fill: none; stroke: #e3001b; }
+.cl-civic .tick { stroke: #16181c; stroke-width: 1.5; }
+.cl-civic .tick.mid { stroke-width: 2.1; }
+.cl-civic .tick.major { stroke-width: 3; }
+.cl-civic .tick.hot { stroke: #c80018; }
+.cl-civic .num { fill: #121418; font: 600 21px "Barlow", sans-serif; }
+.cl-civic .num.hot { fill: #c80018; }
+.cl-civic .unit { fill: #5a5e64; font: 600 10px "Barlow", sans-serif; letter-spacing: 0.06em; }
+.cl-civic .badge { fill: #e3001b; font: italic 700 16px "Exo 2", sans-serif; letter-spacing: 0.04em; }
+.cl-civic .nd { fill: #e3001b; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45)); }
+.cl-civic .ndw { fill: #1a1a1c; }
+.cl-civic .hub { fill: #141519; stroke: #2c2f35; stroke-width: 2; }
+.cl-civic .hubcap { fill: #34373d; }
+.cl-civic .lcd { background: linear-gradient(180deg, #1a1208, #0c0803); border: 1px solid #3b2a12; box-shadow: inset 0 0 22px rgba(255, 140, 20, 0.08); color: #ffb347; }
+.cl-civic .brandline { color: #e3001b; font: italic 700 12px/1 "Exo 2", sans-serif; letter-spacing: 0.16em; }
+.cl-civic .gear, .cl-civic .dspd b { color: #ffb347; font-family: "Barlow", sans-serif; text-shadow: 0 0 8px rgba(255, 150, 40, 0.45); }
+.cl-civic .dspd span, .cl-civic .msg { color: #a3793f; }
+.cl-civic .vtec {
+  font: italic 700 13px/1 "Exo 2", sans-serif; letter-spacing: 0.12em; padding: 4px 8px; border-radius: 4px;
+  color: #4d3614; border: 1px solid #3b2a12; white-space: nowrap; transition: background 0.08s, color 0.08s;
+}
+.cl-civic .vtec.on { color: #1a0d00; background: #ffb000; border-color: #ffd36b; box-shadow: 0 0 12px rgba(255, 176, 0, 0.85); }
+
+/* 911 GT3: conta-giros central com telas dos lados */
+.cl-gt3 .bg { fill: #07080a; }
+.cl-gt3 .scr { fill: url(#gt3-scr); stroke: #22262d; stroke-width: 1.5; }
+.cl-gt3 .ring { fill: none; stroke: url(#gt3-ring); stroke-width: 5; }
+.cl-gt3 .face { fill: url(#gt3-face); stroke: #24272d; stroke-width: 1; }
+.cl-gt3 .redarc { fill: none; stroke: #e5231b; stroke-width: 6; }
+.cl-gt3 .tick { stroke: #e9ecef; stroke-width: 1.5; }
+.cl-gt3 .tick.mid { stroke-width: 2; }
+.cl-gt3 .tick.major { stroke-width: 3.2; }
+.cl-gt3 .tick.hot { stroke: #ff3b30; }
+.cl-gt3 .num { fill: #f4f5f7; font: 600 21px "Barlow", sans-serif; }
+.cl-gt3 .num.hot { fill: #ff4a3d; }
+.cl-gt3 .ptr { fill: #ff4b1f; filter: drop-shadow(0 0 2px rgba(255, 75, 31, 0.6)); }
+.cl-gt3 .cap { fill: #121418; stroke: #3d4148; stroke-width: 2; }
+.cl-gt3 .cap2 { fill: #2a2d33; }
+.cl-gt3 .gunit { fill: #8a919b; font: 500 9.5px "Barlow", sans-serif; letter-spacing: 0.14em; }
+.cl-gt3 .ggear { fill: #fff; font: 600 46px "Barlow", sans-serif; }
+.cl-gt3 .ggear.hot { fill: #ff4a3d; }
+.cl-gt3 .gmsg { fill: #b9c0c9; font: 500 13px var(--font-ui); }
+.cl-gt3 .gshift { fill: #ff3b30; font: 700 12px "Barlow", sans-serif; letter-spacing: 0.32em; opacity: 0.14; }
+.cl-gt3 .gshift.on { opacity: 1; }
+.cl-gt3 .gshift.hot { filter: drop-shadow(0 0 5px rgba(255, 59, 48, 0.9)); }
+.cl-gt3 .sl { fill: none; stroke: #1c1f25; stroke-width: 9; }
+.cl-gt3 .sl.on.g { stroke: #2cff6a; filter: drop-shadow(0 0 3px #2cff6a); }
+.cl-gt3 .sl.on.y { stroke: #ffd21f; filter: drop-shadow(0 0 3px #ffd21f); }
+.cl-gt3 .sl.on.r { stroke: #ff3b2f; filter: drop-shadow(0 0 3px #ff3b2f); }
+.cl-gt3 .slbl { fill: #7d848e; font: 600 11px "Barlow", sans-serif; letter-spacing: 0.18em; }
+.cl-gt3 .sval { fill: #fff; font: 600 40px "Barlow", sans-serif; font-variant-numeric: tabular-nums; }
+.cl-gt3 .sval.sm { font-size: 30px; }
+.cl-gt3 .smode { fill: #2b8fff; font: 700 15px "Barlow", sans-serif; letter-spacing: 0.24em; }
+.cl-gt3 .slamp { fill: #2c3037; font: 600 11px var(--font-ui); letter-spacing: 0.14em; }
+.cl-gt3 .slamp.cut.on { fill: #ff3b3b; }
+.cl-gt3 .slamp.pop.on { fill: #ffa63b; }
+.cl-gt3 .slamp.obd.on { fill: #39d98a; }
+
 /* LEDs de troca */
 .cl .led { fill: #17171d; stroke: #26262e; stroke-width: 1; }
 .cl .led.on.g { fill: #2cff6a; stroke: #7dffa6; filter: drop-shadow(0 0 4px #2cff6a); }
@@ -266,7 +331,7 @@ h1 span { color: var(--accent); }
 .car[aria-checked="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 8px 22px rgba(0, 0, 0, 0.45); }
 .car[aria-checked="true"] img, .car:hover img { filter: none; }
 @media (min-width: 900px) {
-  .cars { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; padding: 2px 0 4px; overflow: visible; }
+  .cars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 2px 0 4px; overflow: visible; }
   .car { grid-template-columns: minmax(0, 1fr); padding: 0; overflow: hidden; border-radius: 14px; }
   .car img { width: 100%; height: auto; aspect-ratio: 3 / 2; border-radius: 0; }
   .car .meta { padding: 7px 10px 9px; }
@@ -373,5 +438,5 @@ body.cockpit.obd-live .app { grid-template-columns: minmax(0, 1fr) auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .start .ring, .pad .fill, .car, .car img { transition: none; }
+  .start .ring, .pad .fill, .car, .car img, .cl-civic .vtec { transition: none; }
 }

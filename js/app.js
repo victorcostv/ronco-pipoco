@@ -9,9 +9,11 @@
     { skin: 'gti', name: 'Golf GTI', engine: '2.0 TSI turbo', power: '230 cv', spdMax: 280, redFrom: 6500, img: 'img/gti.webp', line: 'Volkswagen Golf GTI · 2.0 TSI turbo' },
     { skin: 'huracan', name: 'Huracán', engine: 'V10 5.2', power: '610 cv', spdMax: 325, redFrom: 8500, img: 'img/huracan.webp', line: 'Lamborghini Huracán LP610-4 · V10 5.2' },
     { skin: 'maverick', name: 'Maverick GT', engine: 'V8 302', power: '199 cv', spdMax: 200, redFrom: 5500, img: 'img/maverick.webp', line: 'Ford Maverick GT 1975 · V8 302' },
-    { skin: 'f1', name: 'Fórmula 1', engine: 'V10 3.0', power: '900 cv', spdMax: 370, redFrom: 18000, img: 'img/f1.webp', line: 'Fórmula 1 anos 2000 · V10 3.0' }
+    { skin: 'f1', name: 'Fórmula 1', engine: 'V10 3.0', power: '900 cv', spdMax: 370, redFrom: 18000, img: 'img/f1.webp', line: 'Fórmula 1 anos 2000 · V10 3.0' },
+    { skin: 'civic', name: 'Civic Type R', engine: '1.6 VTEC', power: '185 cv', spdMax: 240, redFrom: 8400, img: 'img/civic.webp', line: 'Honda Civic Type R (EK9) · 1.6 VTEC aspirado' },
+    { skin: 'gt3', name: '911 GT3', engine: 'Boxer 6 4.0', power: '510 cv', spdMax: 340, redFrom: 9000, img: 'img/gt3.webp', line: 'Porsche 911 GT3 (992) · boxer 6 4.0 aspirado' }
   ];
-  const ORDER = [0, 3, 1, 2, 4];
+  const ORDER = [0, 3, 1, 5, 6, 2, 4];
   const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---------- preferências salvas ----------
@@ -32,7 +34,7 @@
 
   let on = false, audio = null, cluster = null, cockpit = false;
   let S = { rpm: 0, thr: 0, gear: 1, kmh: 0, boost: 0, pops: 0, big: 0, state: 0, cut: false, mode: 0 };
-  let lastPops = 0, lastBig = 0, flash = 0, lastBuzz = 0, sweepT0 = -1, dispRpm = 0, dispKmh = 0, lastT = 0, shiftFlash = false;
+  let lastPops = 0, lastBig = 0, flash = 0, lastBuzz = 0, sweepT0 = -1, dispRpm = 0, dispKmh = 0, lastT = 0, shiftFlash = false, lastVtec = 0;
   const obd = { link: null, busy: false, rate: 0, pedalName: null };
   const clusterEl = $('cluster'), shiftGlow = $('shiftGlow'), themeMeta = document.querySelector('meta[name="theme-color"]');
 
@@ -113,6 +115,9 @@
       if (big && now - lastBuzz > 140 && navigator.vibrate) { try { navigator.vibrate(14); } catch (e) {} lastBuzz = now; }
     }
     lastPops = r.pops; lastBig = r.big;
+    // VTEC entrando: um tranco no celular junto com a troca de comando
+    if ((r.vtecN || 0) > lastVtec && navigator.vibrate) { try { navigator.vibrate(22); } catch (e) {} }
+    lastVtec = r.vtecN || 0;
     S = r;
   }
 
@@ -247,7 +252,7 @@
     const g = gearInfo();
     cluster.update({
       rpm: dispRpm, kmh: dispKmh, lim, state: S.state, cut: !!S.cut && S.state === 2,
-      obd: !!obd.link, flash, boost: S.boost || 0, mode, pops: S.pops || 0, now, odoKm, shift, blink,
+      obd: !!obd.link, flash, boost: S.boost || 0, mode, pops: S.pops || 0, now, odoKm, shift, blink, vtec: !!S.vtec,
       gearTxt: g.gearTxt, gearChar: g.gearChar, quad: g.quad, gearNum: g.gearNum, sub: g.sub, msg: g.msg
     });
     requestAnimationFrame(frame);

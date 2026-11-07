@@ -12,6 +12,8 @@ no estilo de cada carro (conta-giros e velocímetro) e ligação com o OBD2 do s
 | Chevrolet Camaro SS | V8 6.2 aspirado | Dois relógios com aro cromado, luz azul e ponteiro vermelho |
 | Ford Maverick GT 1975 | V8 302 (5.0) | Relógios pretos anos 70, cromado largo, agulha laranja, quadrante P R N D 2 1 e hodômetro |
 | Volkswagen Golf GTI | 2.0 TSI turbo | Fundo com colmeia, números brancos, faixa e ponteiros vermelhos, pressão do turbo |
+| Honda Civic Type R (EK9) | 1.6 VTEC aspirado (B16B), 8.700 rpm | Relógios brancos com ponteiros vermelhos, conta-giros até 10 mil, visor âmbar e luz do VTEC |
+| Porsche 911 GT3 (992) | Boxer 6 4.0 aspirado, 9.000 rpm | Conta-giros central grande com luzes de troca no arco e telas dos lados (velocidade, pipocos, giro e modo) |
 | Lamborghini Huracán | V10 5.2 | Painel digital com conta-giros central, hexágonos, LEDs de troca e velocidade em dígitos |
 | Fórmula 1 anos 2000 | V10 3.0 | Visor do volante com 15 LEDs de troca e LCD de segmentos |
 
@@ -22,7 +24,8 @@ no estilo de cada carro (conta-giros e velocímetro) e ligação com o OBD2 do s
 - **Andando**: o carro troca de marcha sozinho, com pipoco nas reduções. Aparece o pedal de freio.
 - **Pipoco** controla a quantidade de estouros, **Escape** vai do escapamento original ao aberto e **Volume** é o volume.
 - No teclado: ↑ ou espaço acelera, ↓ freia.
-- Perto do limitador o painel acende **SHIFT**; em cima dele, pisca em vermelho (e os LEDs de troca do Huracán e da F1 piscam juntos).
+- Perto do limitador o painel acende **SHIFT**; em cima dele, pisca em vermelho (e os LEDs de troca do Huracán, do 911 GT3 e da F1 piscam juntos).
+- No **Civic**, acima de 5.800 rpm com o pé embaixo o **VTEC** entra: o comando troca pro perfil bravo, o ronco fica mais alto e rasgado, a admissão grita, o motor puxa mais e acende a luz VTEC no painel. Segurando o pedal em uns 70% dá pra ficar dentro do VTEC.
 - O botão de tela cheia liga o **modo painel**: some tudo e ficam só os relógios (com o pedal ao lado quando não há OBD2). A tela não apaga enquanto o motor está ligado. As escolhas ficam salvas no aparelho.
 
 ## OBD2

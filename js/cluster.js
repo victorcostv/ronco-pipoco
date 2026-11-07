@@ -1,7 +1,8 @@
 /* Ronco & Pipoco — painéis de instrumentos no estilo de cada carro
    Cluster.mount(raiz, carro, preset) monta o painel e devolve { update(estado), max, dense }.
    Cada "skin" desenha o conta-giros e o velocímetro do jeito do carro:
-   analógico com ponteiro (Camaro, Maverick, GTI) ou digital (Huracán, Fórmula 1). */
+   analógico com ponteiro (Camaro, Maverick, GTI, Civic), conta-giros central (911 GT3)
+   ou digital (Huracán, Fórmula 1). */
 const Cluster = (() => {
   const NS = 'http://www.w3.org/2000/svg';
   const THREE_COL = 560; // mesma largura do @container clusterbox em css/app.css
@@ -108,7 +109,7 @@ const Cluster = (() => {
     const tach = dial(svgT, skin.tach(c), skin.style);
     const spd = dial(svgS, skin.speedo(c), skin.style);
     const q = (sel) => cBox.querySelector(sel);
-    const gear = q('.gear'), kmh = q('.kmh'), msg = q('.msg'), sh = q('.shift');
+    const gear = q('.gear'), kmh = q('.kmh'), msg = q('.msg'), sh = q('.shift'), vtec = q('.vtec');
     const lCut = q('.lamp.cut'), lObd = q('.lamp.obd'), lPop = q('.lamp.pop');
     const bFill = q('.bfill'), bVal = q('.bval'), gsm = q('.gsmall');
     const quad = cBox.querySelectorAll('.quad span'), odo = cBox.querySelectorAll('.odo i');
@@ -122,6 +123,7 @@ const Cluster = (() => {
         setText(kmh, String(Math.round(s.kmh)));
         setCls(lCut, 'on', s.cut); setCls(lObd, 'on', s.obd); setCls(lPop, 'on', s.flash > 0.25);
         setCls(sh, 'on', shiftOn(s)); setCls(sh, 'hot', s.shift === 2);
+        setCls(vtec, 'on', s.vtec && running);
         if (bFill) {
           const b = Math.max(0, Math.min(1, s.boost || 0));
           bFill.style.width = (b * 100).toFixed(1) + '%';
@@ -201,13 +203,34 @@ const Cluster = (() => {
     center: () => `<div class="mfd"><div class="row r1"><span class="brandline">GTI</span>${SHIFT}</div><div class="row r2"><span class="gear"></span>${SPEED}</div><div class="boost"><span>Turbo</span><i class="bar"><b class="bfill"></b></i><em class="bval">0,0 bar</em></div><div class="row r3"><span class="msg"></span>${LAMPS}</div></div>`
   };
 
-  /* ---------- LEDs de troca (Huracán e F1) ---------- */
+  /* ---------- Honda Civic Type R (EK9): relógios brancos, ponteiros vermelhos e luz do VTEC ---------- */
+  const civic = {
+    id: 'civic',
+    defs: `<defs>
+      <radialGradient id="civ-face" cx="50%" cy="38%" r="68%"><stop offset="0" stop-color="#ffffff"/><stop offset=".7" stop-color="#f0f0ea"/><stop offset="1" stop-color="#d4d4cc"/></radialGradient>
+      <linearGradient id="civ-bezel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c4f56"/><stop offset=".45" stop-color="#111215"/><stop offset="1" stop-color="#3a3d44"/></linearGradient>
+    </defs>`,
+    style: {
+      R: 131, bezel: 7, tickIn: 5, minorLen: 7, midLen: 10, majorLen: 16, labelIn: 37, glow: false,
+      redBand: true, bandIn: 3, bandW: 10,
+      needle: needles.thin, hub: 14, hubCap: 5, unitY: 62, badgeY: 36
+    },
+    tach: (c) => ({ max: c.dialMax, minor: 250, mid: 500, major: 1000, redFrom: c.redFrom, a0: 150, sweep: 240, fmt: (v) => String(v / 1000), unit: 'x1000r/min', badge: 'TYPE R' }),
+    speedo: (c) => ({ max: c.spdMax, minor: 10, major: 20, label: c.dense ? 20 : 40, redFrom: Infinity, a0: 150, sweep: 240, fmt: (v) => String(v), unit: 'km/h' }),
+    center: () => `<div class="lcd"><div class="row r1"><span class="brandline">TYPE R</span><span class="vtec">VTEC</span>${SHIFT}</div><div class="row r2"><span class="gear"></span>${SPEED}</div><div class="row r3"><span class="msg"></span>${LAMPS}</div></div>`
+  };
+
+  /* ---------- LEDs de troca (Huracán, F1 e 911 GT3) ---------- */
   function ledStrip(svg, n, x0, x1, y, r, colors) {
     const leds = [];
     for (let i = 0; i < n; i++) {
       const x = x0 + (x1 - x0) * (n > 1 ? i / (n - 1) : 0.5);
       leds.push(el('circle', { cx: fx(x), cy: y, r, class: 'led ' + colors(i) }, svg));
     }
+    return ledDriver(leds);
+  }
+  function ledDriver(leds) {
+    const n = leds.length;
     let last = -1;
     return {
       set(s, now) {
@@ -391,7 +414,86 @@ const Cluster = (() => {
     }
   };
 
-  const SKINS = { camaro, maverick, gti, huracan, f1 };
+  /* ---------- Porsche 911 GT3 (992): conta-giros central grande, telas dos lados e luzes de troca no arco ---------- */
+  const gt3 = {
+    id: 'gt3',
+    build(root, c) {
+      root.innerHTML = '';
+      root.className = 'cl cl-gt3';
+      const W = 560, H = 300, cx = 280, cy = 151, R = 128, a0 = 135, sw = 270;
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Painel com conta-giros central' }, root);
+      svg.innerHTML = `<defs>
+        <radialGradient id="gt3-face" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#1c1e23"/><stop offset=".8" stop-color="#0c0d10"/><stop offset="1" stop-color="#050506"/></radialGradient>
+        <linearGradient id="gt3-ring" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a3a9b1"/><stop offset=".5" stop-color="#363a40"/><stop offset="1" stop-color="#80868e"/></linearGradient>
+        <linearGradient id="gt3-scr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#13161b"/><stop offset="1" stop-color="#08090b"/></linearGradient>
+      </defs>`;
+      el('rect', { x: 0, y: 0, width: W, height: H, rx: 22, class: 'bg' }, svg);
+      // telas dos lados: velocidade e pipocos à esquerda, giro e modo à direita
+      const SX = [12, W - 144], SW = 132;
+      for (const x of SX) el('rect', { x, y: 52, width: SW, height: 196, rx: 16, class: 'scr' }, svg);
+      const L = SX[0] + SW / 2, Rx = SX[1] + SW / 2;
+      txt(svg, L, 80, 'slbl', 'KM/H');
+      const spd = txt(svg, L, 120, 'sval', '0');
+      txt(svg, L, 166, 'slbl', 'PIPOCOS');
+      const pops = txt(svg, L, 190, 'sval sm', '0');
+      const lPop = txt(svg, L - 30, 228, 'slamp pop', 'POP');
+      const lCut = txt(svg, L + 22, 228, 'slamp cut', 'LIMITE');
+      txt(svg, Rx, 80, 'slbl', 'RPM');
+      const rpmT = txt(svg, Rx, 120, 'sval sm', '0');
+      const mode = txt(svg, Rx, 170, 'smode', 'NORMAL');
+      const lObd = txt(svg, Rx, 228, 'slamp obd', 'OBD');
+      // conta-giros
+      el('circle', { cx, cy, r: R + 8, class: 'ring' }, svg);
+      el('circle', { cx, cy, r: R, class: 'face' }, svg);
+      const ang = (v) => a0 + sw * Math.min(1, Math.max(0, v / c.dialMax));
+      el('path', { d: arc(cx, cy, R - 4, ang(c.redFrom), ang(c.dialMax)), class: 'redarc' }, svg);
+      const tg = el('g', { class: 'ticks' }, svg);
+      for (let v = 0; v <= c.dialMax; v += 250) {
+        const major = isMult(v, 1000), mid = !major && isMult(v, 500);
+        const a = ang(v), lenT = major ? 15 : mid ? 10 : 6;
+        const [x0, y0] = polar(cx, cy, R - 9, a), [x1, y1] = polar(cx, cy, R - 9 - lenT, a);
+        const hot = v >= c.redFrom;
+        el('line', { x1: fx(x0), y1: fx(y0), x2: fx(x1), y2: fx(y1), class: 'tick' + (major ? ' major' : mid ? ' mid' : '') + (hot ? ' hot' : '') }, tg);
+        if (major) { const [tx, ty] = polar(cx, cy, R - 40, a); txt(svg, tx, ty, 'num' + (hot ? ' hot' : ''), String(v / 1000)); }
+      }
+      // luzes de troca em arco, no alto do mostrador: verde, amarelo, vermelho
+      const NL = 10, la0 = 229, la1 = 311, lr = R - 62, segs = [];
+      for (let i = 0; i < NL; i++) {
+        const mid = la0 + (la1 - la0) * (i + 0.5) / NL, half = (la1 - la0) / NL / 2 - 1.4;
+        segs.push(el('path', { d: arc(cx, cy, lr, mid - half, mid + half), class: 'sl ' + (i < 4 ? 'g' : i < 7 ? 'y' : 'r') }, svg));
+      }
+      const leds = ledDriver(segs);
+      const shiftT = txt(svg, cx, cy - 36, 'gshift', 'SHIFT');
+      txt(svg, cx, cy + 28, 'gunit', '1/min x1000');
+      const gear = txt(svg, cx, cy + 60, 'ggear', '');
+      const msg = txt(svg, cx, cy + 97, 'gmsg', '');
+      const ng = el('g', { class: 'pointer' }, svg);
+      el('polygon', { points: `${cx - 24},${cy - 3.4} ${cx + R - 13},${cy - 1} ${cx + R - 13},${cy + 1} ${cx - 24},${cy + 3.4}`, class: 'ptr' }, ng);
+      el('circle', { cx, cy, r: 15, class: 'cap' }, svg);
+      el('circle', { cx, cy, r: 5, class: 'cap2' }, svg);
+      const fmtRpm = (r) => { const v = Math.round(r / 10) * 10; return v >= 1000 ? Math.floor(v / 1000) + '.' + String(v % 1000).padStart(3, '0') : String(v); };
+      let curA = -1e9;
+      return {
+        update(s) {
+          const a = ang(s.rpm);
+          if (Math.abs(a - curA) > 0.03) { curA = a; ng.setAttribute('transform', `rotate(${fx(a)} ${cx} ${cy})`); }
+          const running = s.state === 2;
+          setText(gear, running ? (s.gearChar === '-' ? '–' : s.gearChar) : '');
+          setText(msg, running ? (s.sub || '') : s.msg);
+          setText(spd, String(Math.round(s.kmh)));
+          setText(pops, String(s.pops || 0));
+          setText(rpmT, fmtRpm(s.rpm));
+          setText(mode, s.obd ? 'TRACK' : s.mode === 1 ? 'SPORT' : 'NORMAL');
+          setCls(lCut, 'on', s.cut); setCls(lObd, 'on', s.obd); setCls(lPop, 'on', s.flash > 0.25);
+          setCls(gear, 'hot', running && s.rpm >= c.redFrom);
+          setCls(shiftT, 'on', shiftOn(s)); setCls(shiftT, 'hot', s.shift === 2);
+          leds.set(s, s.now);
+        }
+      };
+    }
+  };
+
+  const SKINS = { camaro, maverick, gti, civic, gt3, huracan, f1 };
 
   // largura do painel decide o formato (2 × 2 no celular, 3 partes quando cabe) e a densidade dos números
   function layoutOf(root) {
