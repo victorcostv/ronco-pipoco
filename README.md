@@ -36,6 +36,17 @@ Com um adaptador ELM327 ligado no carro, o giro, o pedal e a velocidade do carro
 - **Android (Chrome)**: só adaptadores Bluetooth BLE (4.0). Toque em *Adaptador BLE*.
 - O giro do carro é convertido pra faixa do carro escolhido. Com o carro parado, pise até o fundo uma vez pra calibrar o pedal.
 
+## App de iPhone
+
+A pasta `ios/` tem o app nativo (Swift) que leva este mesmo site por dentro, sem precisar de internet, e acrescenta o que o navegador do iPhone não tem:
+
+- **OBD2 pelo iPhone**: adaptador ELM327 **Wi-Fi** (conecte o iPhone na rede Wi-Fi do adaptador e toque em *Conectar OBD2 Wi-Fi*) ou **Bluetooth BLE 4.0** (toque em *Adaptador Bluetooth BLE* e escolha na lista). Adaptador Bluetooth comum (2.0) não conversa com o iPhone.
+- Vibração nos pipocos grandes e na entrada do VTEC.
+- Tela sempre acesa com o motor ligado e modo painel em tela cheia de verdade (some a barra de status).
+- O som toca mesmo com a chave de silencioso ligada.
+
+Bundle `br.com.roncopipoco.app`. Como mandar uma versão nova para o TestFlight: [ios/COMO-PUBLICAR.md](ios/COMO-PUBLICAR.md).
+
 ## Rodando local
 
 É só abrir o `index.html` no Chrome. Pra ter o cache offline e instalar como app, sirva por HTTP, por exemplo:
@@ -54,3 +65,4 @@ e abra `http://localhost:8765/`.
 - `js/obd.js` — ELM327 por Web Serial e Web Bluetooth.
 - `js/app.js` — interface, pedais, garagem e OBD2.
 - `sw.js`, `manifest.webmanifest` — app instalável e cache offline.
+- `ios/` — app de iPhone: `RoncoPipoco/` (Swift + `ronco-ios.js`, a ponte com a página), `copia-site.sh` (põe o site dentro do app a cada compilação) e `fontes/` (as fontes, pra funcionar sem internet).

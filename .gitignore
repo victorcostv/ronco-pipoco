@@ -2,3 +2,6 @@
 *.log
 Thumbs.db
 desktop.ini
+xcuserdata/
+*.xcuserstate
+ios/build/

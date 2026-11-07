@@ -439,7 +439,10 @@
 
   // ---------- OBD2 ----------
   const obdBtn = $('obdBtn'), obdBle = $('obdBle'), obdMsgEl = $('obdMsg'), obdLog = $('obdLog');
-  const hasSerial = 'serial' in navigator, hasBle = 'bluetooth' in navigator;
+  // no app de iPhone o próprio app fala com o ELM327 (Wi-Fi ou Bluetooth BLE) e entrega a conexão pronta
+  const native = window.roncoNative || null;
+  const hasSerial = native ? true : 'serial' in navigator, hasBle = native ? true : 'bluetooth' in navigator;
+  if (native) obdBle.textContent = 'Adaptador Bluetooth BLE';
   const cal = { lo: null, hi: null };
   const obdMsg = (t, err) => { obdMsgEl.textContent = t; obdMsgEl.classList.toggle('err', !!err); };
   const logLine = (t) => { const ls = obdLog.textContent ? obdLog.textContent.split('\n') : []; ls.push(t); obdLog.textContent = ls.slice(-40).join('\n'); };
@@ -483,7 +486,7 @@
     return Math.max(0, Math.min(1, (raw - cal.lo - 1.5) / (span - 1.5)));
   }
   function setObdUi(st) {
-    obdBtn.textContent = st === 'on' ? 'Desconectar OBD2' : st === 'busy' ? 'Conectando…' : 'Conectar OBD2';
+    obdBtn.textContent = st === 'on' ? 'Desconectar OBD2' : st === 'busy' ? 'Conectando…' : native ? 'Conectar OBD2 Wi-Fi' : 'Conectar OBD2';
     obdBtn.setAttribute('aria-pressed', st === 'on' ? 'true' : 'false');
     obdBtn.disabled = st === 'busy' || !hasSerial;
     obdBle.hidden = st !== 'idle' || !hasBle;
@@ -497,6 +500,11 @@
   function obdErrText(e) {
     const m = String((e && (e.message || e.name)) || e), n = e && e.name;
     if (n === 'NotFoundError') return 'Nenhum aparelho escolhido.';
+    if (/^wifi/.test(m)) return 'Não achei o ELM327 no Wi-Fi. Ligue a ignição, entre na rede Wi-Fi do adaptador (algo como "WiFi_OBDII") nos Ajustes do iPhone e tente de novo.';
+    if (/^ble-desligado/.test(m)) return 'O Bluetooth do iPhone está desligado. Ligue e tente de novo.';
+    if (/^ble-negado/.test(m)) return 'O app não tem permissão pra usar o Bluetooth. Libere em Ajustes > Privacidade e Segurança > Bluetooth.';
+    if (/^ble-nenhum/.test(m)) return 'Não achei nenhum adaptador Bluetooth BLE por perto. Ligue a ignição e confira se o seu ELM327 é BLE (4.0); os Bluetooth comuns não falam com o iPhone, aí use um Wi-Fi.';
+    if (/^ble-conexao/.test(m)) return 'Não deu pra conectar no adaptador Bluetooth. Chegue perto do carro e tente de novo.';
     if (n === 'SecurityError') return 'O navegador bloqueou o acesso ao aparelho. Abra a página direto no Chrome.';
     if (/ble-sem-servico/.test(m)) return 'Esse aparelho não tem o canal de dados do ELM327 por BLE. Use o botão Conectar OBD2.';
     if (n === 'NetworkError' || n === 'InvalidStateError' || /Failed to open/i.test(m)) return 'Não deu pra abrir a porta. Feche outros apps que usem o ELM327 e tente de novo.';
@@ -510,7 +518,7 @@
     if (obd.link) { obdStop('OBD2 desconectado.'); return; }
     const audioReady = ensureAudio();
     let pick;
-    try { pick = kind === 'ble' ? openBle() : openSerial(); } catch (e) { pick = Promise.reject(e); }
+    try { pick = native ? native.open(kind === 'ble' ? 'ble' : 'wifi') : kind === 'ble' ? openBle() : openSerial(); } catch (e) { pick = Promise.reject(e); }
     obdRun(audioReady, pick);
   }
   async function obdRun(audioReady, pick) {
@@ -575,7 +583,8 @@
   buildGarage();
   applyMode();
   setObdUi('idle');
-  if (!hasSerial && !hasBle) obdMsg('Pra ligar no OBD2, abra esta página no Chrome ou no Edge do computador, ou no Chrome do Android com adaptador BLE.', true);
+  if (native) obdMsg('No iPhone: adaptador ELM327 Wi-Fi (entre na rede Wi-Fi dele antes) ou Bluetooth BLE (4.0).');
+  else if (!hasSerial && !hasBle) obdMsg('Pra ligar no OBD2, abra esta página no Chrome ou no Edge do computador, ou no Chrome do Android com adaptador BLE.', true);
   else if (!hasSerial) obdMsg('Este navegador só fala com adaptadores Bluetooth BLE. Pra ELM327 Bluetooth comum, use o Chrome no computador.');
   else obdMsg('Conecte o ELM327 e escolha a porta dele na lista do Chrome.');
   buildCluster();
