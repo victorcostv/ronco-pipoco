@@ -37,7 +37,9 @@ button:focus-visible, input:focus-visible, summary:focus-visible, [tabindex]:foc
 
 /* ---------- topo ---------- */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.brand { min-width: 0; }
+.brand { min-width: 0; display: flex; align-items: center; gap: 10px; }
+.brandtxt { min-width: 0; }
+.logo { flex: none; display: block; width: 44px; height: 44px; border-radius: 11px; box-shadow: 0 0 0 1px var(--line), 0 6px 16px rgba(0, 0, 0, 0.5); }
 h1 { margin: 0; font: 700 22px/1 var(--font-num); letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
 h1 span { color: var(--accent); }
 .carline { margin: 5px 0 0; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -401,6 +403,7 @@ h1 span { color: var(--accent); }
   .cluster-wrap, .garage, .controls, .status { grid-column: 1; }
   .pedals { grid-column: 2; grid-row: 2 / span 4; min-height: 540px; }
   h1 { font-size: 28px; }
+  .logo { width: 52px; height: 52px; border-radius: 13px; }
   .start { width: 72px; height: 72px; }
   .start b { font-size: 15px; }
   .start small { font-size: 9px; }

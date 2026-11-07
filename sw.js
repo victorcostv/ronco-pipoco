@@ -1,10 +1,10 @@
 /* Virtual Pops — cache pra funcionar sem internet (no carro) */
-const VERSION = 'ronco-v3';
+const VERSION = 'ronco-v4';
 const FONTS = 'ronco-fonts-v1';
 const SHELL = [
   './', './index.html', './css/app.css',
   './js/engine.js', './js/obd.js', './js/cluster.js', './js/app.js',
-  './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',
+  './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
   './img/camaro.webp', './img/gti.webp', './img/huracan.webp', './img/maverick.webp', './img/f1.webp',
   './img/civic.webp', './img/gt3.webp'
 ];
