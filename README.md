@@ -65,4 +65,4 @@ e abra `http://localhost:8765/`.
 - `js/obd.js` — ELM327 por Web Serial e Web Bluetooth.
 - `js/app.js` — interface, pedais, garagem e OBD2.
 - `sw.js`, `manifest.webmanifest` — app instalável e cache offline.
-- `ios/` — app de iPhone: `RoncoPipoco/` (Swift + `ronco-ios.js`, a ponte com a página), `copia-site.sh` (põe o site dentro do app a cada compilação) e `fontes/` (as fontes, pra funcionar sem internet).
+- `ios/` — app de iPhone: `VirtualPops/` (Swift + `ronco-ios.js`, a ponte com a página), `copia-site.sh` (põe o site dentro do app a cada compilação) e `fontes/` (as fontes, pra funcionar sem internet).

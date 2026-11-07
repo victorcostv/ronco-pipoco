@@ -8,17 +8,17 @@ O app é o site deste repositório empacotado dentro de um app nativo. Cada comp
 
 ## Mandar uma versão nova para o TestFlight
 
-1. Em `ios/RoncoPipoco.xcodeproj/project.pbxproj`, aumente o **número da compilação** (`CURRENT_PROJECT_VERSION`, nas duas configurações). A Apple recusa número repetido. Para versão nova na loja, aumente também `MARKETING_VERSION` (ex.: 1.1).
+1. Em `ios/VirtualPops.xcodeproj/project.pbxproj`, aumente o **número da compilação** (`CURRENT_PROJECT_VERSION`, nas duas configurações). A Apple recusa número repetido. Para versão nova na loja, aumente também `MARKETING_VERSION` (ex.: 1.1).
 2. Gere a versão final:
 
 ```bash
-cd ios && xcodebuild -project RoncoPipoco.xcodeproj -scheme RoncoPipoco -configuration Release -destination 'generic/platform=iOS' -archivePath /tmp/RoncoPipoco.xcarchive -allowProvisioningUpdates archive
+cd ios && xcodebuild -project VirtualPops.xcodeproj -scheme VirtualPops -configuration Release -destination 'generic/platform=iOS' -archivePath /tmp/VirtualPops.xcarchive -allowProvisioningUpdates archive
 ```
 
 3. Envie para o App Store Connect:
 
 ```bash
-cd ios && xcodebuild -exportArchive -archivePath /tmp/RoncoPipoco.xcarchive -exportOptionsPlist ExportOptions-AppStore.plist -exportPath /tmp/RoncoPipoco-envio -allowProvisioningUpdates
+cd ios && xcodebuild -exportArchive -archivePath /tmp/VirtualPops.xcarchive -exportOptionsPlist ExportOptions-AppStore.plist -exportPath /tmp/VirtualPops-envio -allowProvisioningUpdates
 ```
 
 4. Em 10 a 30 minutos a compilação aparece no TestFlight e chega sozinha no seu iPhone (grupo interno com distribuição automática).
@@ -26,7 +26,7 @@ cd ios && xcodebuild -exportArchive -archivePath /tmp/RoncoPipoco.xcarchive -exp
 ## Testar no simulador
 
 ```bash
-cd ios && xcodebuild -project RoncoPipoco.xcodeproj -scheme RoncoPipoco -destination 'platform=iOS Simulator,name=iPhone 18 Pro' build
+cd ios && xcodebuild -project VirtualPops.xcodeproj -scheme VirtualPops -destination 'platform=iOS Simulator,name=iPhone 18 Pro' build
 ```
 
 Para testar o OBD2 Wi-Fi sem carro, rode um ELM327 de mentira no Mac (porta 35000) e abra o app com

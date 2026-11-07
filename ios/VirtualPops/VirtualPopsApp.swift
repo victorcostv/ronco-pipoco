@@ -5,7 +5,7 @@ import SwiftUI
 /// sem precisar de internet, com o que o navegador do iPhone não dá: vibração, tela sempre acesa,
 /// modo painel em tela cheia e OBD2 pelo Wi-Fi ou Bluetooth BLE.
 @main
-struct RoncoPipocoApp: App {
+struct VirtualPopsApp: App {
     @StateObject private var bridge = NativeBridge()
 
     init() {
