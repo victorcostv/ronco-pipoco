@@ -1,4 +1,4 @@
-/* Ronco & Pipoco — ponte com o app de iPhone.
+/* Virtual Pops — ponte com o app de iPhone.
    O app injeta este arquivo antes da página carregar. Ele troca o que o navegador do iPhone
    não tem (vibração, tela acesa, OBD2) por versões feitas pelo próprio app. */
 (() => {

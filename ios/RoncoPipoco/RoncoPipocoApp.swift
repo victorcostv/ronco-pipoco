@@ -1,7 +1,7 @@
 import AVFoundation
 import SwiftUI
 
-/// Ronco & Pipoco para iPhone: o mesmo site (pasta raiz do repositório) empacotado dentro do app,
+/// Virtual Pops para iPhone: o mesmo site (pasta raiz do repositório) empacotado dentro do app,
 /// sem precisar de internet, com o que o navegador do iPhone não dá: vibração, tela sempre acesa,
 /// modo painel em tela cheia e OBD2 pelo Wi-Fi ou Bluetooth BLE.
 @main

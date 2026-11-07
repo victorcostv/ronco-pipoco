@@ -1,4 +1,4 @@
-/* Ronco & Pipoco — cache pra funcionar sem internet (no carro) */
+/* Virtual Pops — cache pra funcionar sem internet (no carro) */
 const VERSION = 'ronco-v3';
 const FONTS = 'ronco-fonts-v1';
 const SHELL = [

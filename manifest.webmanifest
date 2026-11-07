@@ -1,7 +1,7 @@
 {
-  "name": "Ronco & Pipoco",
-  "short_name": "Ronco",
-  "description": "Simulador de ronco e pipoco de motor com o painel de cada carro e ligação OBD2.",
+  "name": "Virtual Pops",
+  "short_name": "Virtual Pops",
+  "description": "Virtual Pops: simulador de ronco e pipoco de motor com o painel de cada carro e ligação OBD2.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",
@@ -10,8 +10,21 @@
   "background_color": "#0b0c0f",
   "theme_color": "#0b0c0f",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

@@ -1,9 +1,9 @@
-# Ronco & Pipoco
+# Virtual Pops
 
 Simulador de ronco e pipoco de motor que roda no navegador, com o painel de instrumentos
 no estilo de cada carro (conta-giros e velocímetro) e ligação com o OBD2 do seu carro.
 
-**Abrir:** https://victorcostv.github.io/ronco-pipoco/
+**Abrir:** https://victorcostv.github.io/virtual-pops/
 
 ## Carros
 

@@ -1,4 +1,4 @@
-/* Ronco & Pipoco — ligação com o ELM327 (Web Serial e Web Bluetooth) */
+/* Virtual Pops — ligação com o ELM327 (Web Serial e Web Bluetooth) */
 class ObdLink {
   constructor(t, log) {
     this.t = t; this.log = log || (() => {});

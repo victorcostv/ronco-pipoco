@@ -1,4 +1,4 @@
-/* Ronco & Pipoco — motor de som (síntese procedural)
+/* Virtual Pops — motor de som (síntese procedural)
    A classe roda dentro de um AudioWorklet: ela é serializada com toString()
    e colada no módulo do worklet, então nada aqui pode depender de variáveis
    de fora deste arquivo. */

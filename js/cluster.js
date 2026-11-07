@@ -1,4 +1,4 @@
-/* Ronco & Pipoco — painéis de instrumentos no estilo de cada carro
+/* Virtual Pops — painéis de instrumentos no estilo de cada carro
    Cluster.mount(raiz, carro, preset) monta o painel e devolve { update(estado), max, dense }.
    Cada "skin" desenha o conta-giros e o velocímetro do jeito do carro:
    analógico com ponteiro (Camaro, Maverick, GTI, Civic), conta-giros central (911 GT3)

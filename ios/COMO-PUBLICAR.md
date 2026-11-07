@@ -1,4 +1,4 @@
-# Ronco & Pipoco no iPhone
+# Virtual Pops no iPhone
 
 O app é o site deste repositório empacotado dentro de um app nativo. Cada compilação copia o site atual
 (raiz do repositório) para dentro do app, então **mudou o site, é só compilar e enviar de novo**.

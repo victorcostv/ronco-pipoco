@@ -1,4 +1,4 @@
-/* Ronco & Pipoco — interface, pedais, garagem e OBD2 */
+/* Virtual Pops — interface, pedais, garagem e OBD2 */
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id);
